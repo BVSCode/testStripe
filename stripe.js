@@ -40,9 +40,22 @@ exports.webhookCheckout = (req, res, next) => {
         secret,
     });
 
-    const event = stripe.webhooks.constructEvent(payloadString, header, secret);
+    let event;
+
+    try {
+        event = stripe.webhooks.constructEvent(payloadString, header, secret);
+    } catch (error) {
+        return res.status(400).send(`Webhook error: ${error.message}`);
+    }
+
+    if (event.type === 'checkout.session.completed') {
+        console.log(event.data.object);
+        // makePayment(event.data.object);
+    }
+
+    res.status(200).json({ recieved: true });
 
     // Do something with mocked signed event
     //   expect(event.id).to.equal(payload.id);
-    console.log(event.id, payload.id);
+    // console.log(event.id, payload.id);
 };
